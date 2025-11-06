@@ -1,34 +1,34 @@
 FROM python:3.11-slim
 
-# Install system dependencies
+# Install system deps
 RUN apt-get update && apt-get install -y --no-install-recommends build-essential gcc && rm -rf /var/lib/apt/lists/*
 
-# Create non-root user with home directory
+# Create a non-root user 'appuser' with home directory /home/appuser
 RUN useradd --create-home appuser
 
-# Set working directory and give ownership to appuser
+# Set workdir and copy files with ownership changed to appuser
 WORKDIR /app
-RUN chown appuser:appuser /app
 
-# Switch to non-root user
+# Copy requirements first for caching
+COPY --chown=appuser:appuser requirements.txt /app/
+
+# Switch to appuser before installing packages
 USER appuser
 
-# Set environment variables for python and home
+# Set HOME env so pip uses this dir, and adjust PATH for venv
 ENV HOME=/home/appuser
 ENV PATH="/app/venv/bin:$PATH"
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Create virtual environment
-RUN python -m venv /app/venv
+# Create python virtual environment & install dependencies in one command layer
+RUN python -m venv /app/venv && \
+    pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# Copy requirements and install packages in one RUN step to keep env
-COPY --chown=appuser:appuser requirements.txt /app/
-RUN /app/venv/bin/pip install --upgrade pip && /app/venv/bin/pip install --no-cache-dir -r requirements.txt
-
-# Copy application code
+# Copy all source code as appuser
 COPY --chown=appuser:appuser . /app
 
-# Expose port and run
+# Expose port and run app
 EXPOSE 8080
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
