@@ -17,8 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 
 # Upgrade pip and install dependencies
-RUN python -m pip install --upgrade pip \
-    && pip install --no-cache-dir --break-system-packages --prefix=/usr/local -r requirements.txt
+RUN pip install --no-cache-dir --disable-pip-version-check --break-system-packages --prefix=/usr/local -r requirements.txt
 
 # Copy app code
 COPY . .
