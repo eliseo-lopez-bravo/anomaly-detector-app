@@ -8,6 +8,10 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
+# Ensure pip installs globally and not into /.local
+ENV PIP_ROOT_USER_ACTION=ignore
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential gcc \
@@ -16,8 +20,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy requirement list and install Python deps
 COPY requirements.txt .
 
-# Upgrade pip and install dependencies
-RUN pip install --no-cache-dir --disable-pip-version-check --break-system-packages --prefix=/usr/local -r requirements.txt
+# Upgrade pip and install dependencies globally
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Copy app code
 COPY . .
@@ -25,5 +30,5 @@ COPY . .
 # Expose port
 EXPOSE 8080
 
-# Run the app
+# Run the FastAPI app with Uvicorn
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
