@@ -8,28 +8,27 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Disable pip’s user install fallback (causes /.local issue)
-ENV PIP_DISABLE_PIP_VERSION_CHECK=1
-ENV PIP_ROOT_USER_ACTION=ignore
-
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements
+# Create a virtual environment and activate it
+RUN python -m venv /app/venv
+
+# Ensure venv is used by default
+ENV PATH="/app/venv/bin:$PATH"
+
+# Copy requirements and install Python dependencies
 COPY requirements.txt .
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# ✅ Force pip to install globally into /usr/local
-RUN python -m pip install --upgrade pip
-
-RUN HOME=/root python -m pip install --no-cache-dir --user -r requirements.txt
-
-# Copy app code
+# Copy the app code
 COPY . .
 
 # Expose port
 EXPOSE 8080
 
-# Run app
+# Run app from virtual environment
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
