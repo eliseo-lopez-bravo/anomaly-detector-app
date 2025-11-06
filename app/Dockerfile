@@ -17,9 +17,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy requirement list and install Python deps
 COPY requirements.txt .
 
+# Ensure /.local exists and is writable
+RUN mkdir -p /.local && chmod -R 777 /.local
+
 # Upgrade pip and install dependencies
 RUN pip install --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+    && pip install --no-cache-dir --break-system-packages -r requirements.txt
 
 # Copy app code
 COPY . .
