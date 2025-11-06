@@ -10,19 +10,15 @@ ENV PYTHONUNBUFFERED=1
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    gcc \
+    build-essential gcc \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirement list and install Python deps
 COPY requirements.txt .
 
-# Ensure /.local exists and is writable
-RUN mkdir -p /.local && chmod -R 777 /.local
-
 # Upgrade pip and install dependencies
-RUN pip install --upgrade pip \
-    && pip install --no-cache-dir --break-system-packages -r requirements.txt
+RUN python -m pip install --upgrade pip \
+    && pip install --no-cache-dir --break-system-packages --prefix=/usr/local -r requirements.txt
 
 # Copy app code
 COPY . .
