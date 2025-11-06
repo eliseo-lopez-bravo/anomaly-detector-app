@@ -23,7 +23,7 @@ COPY requirements.txt .
 # ✅ Force pip to install globally into /usr/local
 RUN python -m pip install --upgrade pip
 
-RUN HOME=/root python -m pip install --no-cache-dir --prefix=/usr/local -r requirements.txt
+RUN HOME=/root python -m pip install --no-cache-dir --user -r requirements.txt
 
 # Copy app code
 COPY . .
