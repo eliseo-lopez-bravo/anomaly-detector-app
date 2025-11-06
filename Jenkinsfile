@@ -6,10 +6,10 @@ pipeline {
     IMAGE_TAG = "${env.BUILD_ID}-${env.GIT_COMMIT?.take(8) ?: 'local'}"
     IMAGE = "${env.REGISTRY}/${env.REPO}:${IMAGE_TAG}"
   }
-  options {
-    buildDiscarder(logRotator(daysToKeepStr: '30'))
-    timestamps()
-  }
+//  options {
+//    buildDiscarder(logRotator(daysToKeepStr: '30'))
+//    timestamps()
+//  }
   stages {
     stage('Checkout') {
       steps {
